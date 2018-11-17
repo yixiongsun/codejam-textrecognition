@@ -10,12 +10,17 @@ module.exports = class RequestManager {
     async add(frame, image, callback) {
         this.frames += 1
         let request = new GoogleAPI(image)
-        let response = await request.textDetection()
-        this.finishedRequests += 1
-        this.data.push(response)
+        try {
+            let response = await request.textDetection(image)
+            this.finishedRequests += 1
+            this.data.push(response)
 
-        let finished = this.frames == this.finishedRequests
-        return callback(finished)
+            let finished = this.frames == this.finishedRequests
+            return callback(finished, this.data)
+        } catch (err) {
+            console.log(err)
+        }
+
     }
 
     finish() {

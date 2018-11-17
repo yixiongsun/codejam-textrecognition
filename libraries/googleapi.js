@@ -17,15 +17,11 @@ module.exports = class GoogleAPI {
         //this.vision = google.vision({version: "v1p2beta1", })
     }
 
-    textDetection() {
-        return new Promise(function (reject, resolve) {
-            var fs = require('fs');
-            var imageFile = fs.readFileSync('./resources/wakeupcat.jpg');
-
-            // Convert the image data to a Buffer and base64 encode it.
-            var encoded = Buffer.from(imageFile).toString('base64');
+    textDetection(base64) {
+        return new Promise(function (resolve, reject) {
+            
             let request = {
-                image: { content: encoded }
+                image: { content: base64 }
             };
             client
                 .textDetection(request)

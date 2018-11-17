@@ -20,9 +20,10 @@ module.exports = class Python {
             args: args,
             mode: "text"
         }
-        let pyshell = new PythonShell('test.py', options);
+        let pyshell = new PythonShell('run.py', options);
         pyshell.on('message', function (message) {
-            callback(null, message.frame, message.image)
+            let out = JSON.parse(message)
+            callback(null, out.frame, out.image)
         });
         pyshell.end(function (err, code, signal) {
             if (err) throw err;
@@ -35,7 +36,7 @@ module.exports = class Python {
     }
 
     overlay() {
-        
+
     }
     
 

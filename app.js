@@ -31,7 +31,9 @@ const storage = multer.diskStorage({
   }
 });
 
+
 const upload = multer({storage: storage})
+const realtime = multer({ dest: path.join(__dirname, 'uploads') })
 
 
 /**
@@ -116,25 +118,13 @@ app.use('/webfonts', express.static(path.join(__dirname, 'node_modules/@fortawes
  * Primary app routes.
  */
 app.get('/', homeController.index);
-/*
-app.get('/login', userController.getLogin);
-app.post('/login', userController.postLogin);
-app.get('/logout', userController.logout);
-app.get('/forgot', userController.getForgot);
-app.post('/forgot', userController.postForgot);
-app.get('/reset/:token', userController.getReset);
-app.post('/reset/:token', userController.postReset);
-app.get('/signup', userController.getSignup);
-app.post('/signup', userController.postSignup);
-app.get('/contact', contactController.getContact);
-app.post('/contact', contactController.postContact);*/
-
-
 /**
  * API examples routes.
  */
 app.get('/api', apiController.getApi);
 app.get('/api/upload', apiController.getFileUpload);
+app.get('/api/realtime', apiController.getRealTime);
+app.post('/api/realtime', realtime.single("blob"), apiController.postRealTime);
 app.post('/api/upload', upload.single("myFile"), apiController.postFileUpload);
 
 
@@ -166,7 +156,7 @@ app.listen(app.get('port'), () => {
   console.log('%s App is running at http://localhost:%d in %s mode', chalk.green('✓'), app.get('port'), app.get('env'));
   console.log('  Press CTRL-C to stop\n');
   let test = new googleAPI()
-  test.textDetection()
+  //test.textDetection()
   
 });
 

@@ -50,12 +50,21 @@ exports.postFileUpload = (req, res) => {
       return
     }
     requestmanager.add(frame, image, function(finished) {
-      if (finished) {
+      if (finished, response) {
+        console.log(this.response)
+
         res.redirect('/api/upload');
 
       }
     })
   })
 };
+exports.getRealTime = (req, res) => {
+  res.render('api/realtime', {
+    title: 'Real Time video'
+  });
+}
 
-
+exports.postRealTime = (req, res) => {
+  console.log(req)
+}
