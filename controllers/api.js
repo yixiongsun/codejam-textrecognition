@@ -44,7 +44,7 @@ exports.getFileUpload = (req, res) => {
 exports.postFileUpload = (req, res) => {
   let python = new Python(req.file.path, "upload")
   let requestmanager = new RequestManager()
-  python.run(function(finished, frame, image) {
+  python.extract(function(finished, frame, image) {
     if (finished) {
       requestmanager.finish()
       return
