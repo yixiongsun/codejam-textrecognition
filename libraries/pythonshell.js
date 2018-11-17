@@ -11,7 +11,7 @@ module.exports = class Python {
     }
 
     // runs the python script
-    run() {
+    extract(callback) {
         var args = [this.file]
         if (this.language) {
             args.push(this.language)
@@ -22,16 +22,20 @@ module.exports = class Python {
         }
         let pyshell = new PythonShell('test.py', options);
         pyshell.on('message', function (message) {
-            message.frame
+            callback(null, message.frame, message.image)
         });
         pyshell.end(function (err, code, signal) {
             if (err) throw err;
             console.log('The exit code was: ' + code);
             console.log('The exit signal was: ' + signal);
             console.log('finished');
-            console.log('finished');
+            callback(true)
         });
           
+    }
+
+    overlay() {
+        
     }
     
 

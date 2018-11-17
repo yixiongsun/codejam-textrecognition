@@ -11,7 +11,8 @@ const Linkedin = require('node-linkedin')(process.env.LINKEDIN_ID, process.env.L
 const paypal = require('paypal-rest-sdk');
 const lob = require('lob')(process.env.LOB_KEY);
 const ig = require('instagram-node').instagram();
-
+const Python = require('../libraries/pythonshell')
+const RequestManager = require('../libraries/requestmanager')
 
 
 
@@ -41,9 +42,20 @@ exports.getFileUpload = (req, res) => {
 };
 
 exports.postFileUpload = (req, res) => {
-  let python = new python(req.file.path, "upload")
-  python.run()
-  res.redirect('/api/upload');
+  let python = new Python(req.file.path, "upload")
+  let requestmanager = new RequestManager()
+  python.run(function(finished, frame, image) {
+    if (finished) {
+      requestmanager.finish()
+      return
+    }
+    requestmanager.add(frame, image, function(finished) {
+      if (finished) {
+        res.redirect('/api/upload');
+
+      }
+    })
+  })
 };
 
 

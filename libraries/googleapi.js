@@ -12,8 +12,8 @@ const client = new vision.ImageAnnotatorClient({
 
 
 module.exports = class GoogleAPI {
-    constructor() {
-
+    constructor(image) {
+        this.image = image
         //this.vision = google.vision({version: "v1p2beta1", })
     }
 
