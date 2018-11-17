@@ -12,6 +12,10 @@ const paypal = require('paypal-rest-sdk');
 const lob = require('lob')(process.env.LOB_KEY);
 const ig = require('instagram-node').instagram();
 
+
+
+
+
 /**
  * GET /api
  * List of API examples.
@@ -37,7 +41,9 @@ exports.getFileUpload = (req, res) => {
 };
 
 exports.postFileUpload = (req, res) => {
-  req.flash('success', { msg: 'File was uploaded successfully.' });
+  let python = new python(req.file.path, "upload")
+  python.run()
   res.redirect('/api/upload');
 };
+
 

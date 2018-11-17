@@ -19,10 +19,23 @@ const expressValidator = require('express-validator');
 const expressStatusMonitor = require('express-status-monitor');
 const sass = require('node-sass-middleware');
 const multer = require('multer');
+const googleAPI = require('./libraries/googleapi')
+const python = require('./libraries/pythonshell')
 
-const upload = multer({ dest: path.join(__dirname, 'uploads') });
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "./uploads")
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname)
+  }
+});
+
+const upload = multer({storage: storage})
+
 
 /**
+ * 
  * Load environment variables from .env file, where API keys and passwords are configured.
  */
 dotenv.load({ path: '.env.example' });
@@ -69,17 +82,11 @@ app.use(expressValidator());
 
 
 //app.use(flash());
-/*
+
 app.use((req, res, next) => {
-  if (req.path === '/api/upload') {
-    next();
-  } else {
-    lusca.csrf()(req, res, next);
-  }
+  next();
+
 });
-app.use(lusca.xframe('SAMEORIGIN'));
-app.use(lusca.xssProtection(true));*/
-app.disable('x-powered-by');
 app.use((req, res, next) => {
   res.locals.user = req.user;
   next();
@@ -127,6 +134,8 @@ app.post('/contact', contactController.postContact);*/
  * API examples routes.
  */
 app.get('/api', apiController.getApi);
+app.get('/api/upload', apiController.getFileUpload);
+app.post('/api/upload', upload.single("myFile"), apiController.postFileUpload);
 
 
 
@@ -156,6 +165,9 @@ if (process.env.NODE_ENV === 'development') {
 app.listen(app.get('port'), () => {
   console.log('%s App is running at http://localhost:%d in %s mode', chalk.green('✓'), app.get('port'), app.get('env'));
   console.log('  Press CTRL-C to stop\n');
+  let test = new googleAPI()
+  test.textDetection()
+  
 });
 
 module.exports = app;
