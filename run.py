@@ -20,20 +20,22 @@ def emptyFolder(path):
 
 def printBase64(path):
     for filename in os.listdir(path):
-        with open(path+'/'+filename, "rb") as image_file:
-            frame_number = re.search(r'\d+', filename).group();  # some parsing stuff
-            encoded_string = base64.b64encode(image_file.read())
-            encoded_string = str(encoded_string)[2:-1]
-            x = '{{ "frame": "{}", "image":"{}"}}'.format(frame_number, encoded_string)
-            y = json.loads(x)
-            print(json.dumps(y))
+        if not filename.startswith('.'):
+            with open(path+'/'+filename, "rb") as image_file:
+                frame_number = re.search(r'\d+', filename).group()  # some parsing stuff
+                encoded_string = base64.b64encode(image_file.read())
+                encoded_string = str(encoded_string)[2:-1]
+                x = '{{ "frame": "{}", "image":"{}"}}'.format(frame_number, encoded_string)
+                y = json.loads(x)
+                print(json.dumps(y))
 
 input = sys.argv[1]
 #Get video frame count aka length
 cap = cv2.VideoCapture(input)
 length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
-frame_interval = 10
+frame_interval = 2
+length = 200
 for i in range(0, length, frame_interval):
     if(length-1 < i+frame_interval):
         subprocess.call(['ffmpeg', '-i', input, '-vf', 'select=\'between(n\,{}\,{})\''.format(i, length-1), '-vsync', '0', '-frame_pts', '1', 'images/frame%d.png'])

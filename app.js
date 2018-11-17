@@ -20,6 +20,8 @@ const expressStatusMonitor = require('express-status-monitor');
 const sass = require('node-sass-middleware');
 const multer = require('multer');
 const googleAPI = require('./libraries/googleapi')
+const RequestManager = require('./libraries/requestmanager')
+
 const python = require('./libraries/pythonshell')
 
 const storage = multer.diskStorage({
@@ -46,9 +48,7 @@ dotenv.load({ path: '.env.example' });
  * Controllers (route handlers).
  */
 const homeController = require('./controllers/home');
-const userController = require('./controllers/user');
 const apiController = require('./controllers/api');
-const contactController = require('./controllers/contact');
 
 /**
  * API keys and Passport configuration.
@@ -149,15 +149,26 @@ if (process.env.NODE_ENV === 'development') {
   });
 }
 
+async function test() {
+  let test = new googleAPI()
+  let a = await test.textDetection()
+  let requestmanager = new RequestManager()
+  let result = requestmanager.textOnFrame(a)
+  console.log(result)
+
+  test.languageDetect(result)
+}
+
 /**
  * Start Express server.
  */
 app.listen(app.get('port'), () => {
   console.log('%s App is running at http://localhost:%d in %s mode', chalk.green('✓'), app.get('port'), app.get('env'));
   console.log('  Press CTRL-C to stop\n');
-  let test = new googleAPI()
-  //test.textDetection()
+  //test()
   
 });
+
+
 
 module.exports = app;

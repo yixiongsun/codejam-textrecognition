@@ -22,8 +22,16 @@ module.exports = class Python {
         }
         let pyshell = new PythonShell('run.py', options);
         pyshell.on('message', function (message) {
-            let out = JSON.parse(message)
-            callback(null, out.frame, out.image)
+            if (message) {
+                try {
+                    let out = JSON.parse(message)
+                    callback(null, out.frame, out.image)
+                } catch(err) {
+
+                }
+                
+            }
+            
         });
         pyshell.end(function (err, code, signal) {
             if (err) throw err;
@@ -35,8 +43,36 @@ module.exports = class Python {
           
     }
 
-    overlay() {
-
+    overlay(callback) {
+        var args = [this.file]
+        if (this.language) {
+            args.push(this.language)
+        }
+        let options = {
+            args: args,
+            mode: "text"
+        }
+        let pyshell = new PythonShell('run.py', options);
+        pyshell.on('message', function (message) {
+            if (message) {
+                try {
+                    let out = JSON.parse(message)
+                    callback(null, out.frame, out.image)
+                } catch(err) {
+                    
+                }
+                
+            }
+            
+        });
+        pyshell.end(function (err, code, signal) {
+            if (err) throw err;
+            console.log('The exit code was: ' + code);
+            console.log('The exit signal was: ' + signal);
+            console.log('finished');
+            callback(true)
+        });
+          
     }
     
 

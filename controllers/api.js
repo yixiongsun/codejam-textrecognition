@@ -13,7 +13,7 @@ const lob = require('lob')(process.env.LOB_KEY);
 const ig = require('instagram-node').instagram();
 const Python = require('../libraries/pythonshell')
 const RequestManager = require('../libraries/requestmanager')
-
+const fs = require('fs');
 
 
 
@@ -49,10 +49,12 @@ exports.postFileUpload = (req, res) => {
       requestmanager.finish()
       return
     }
-    requestmanager.add(frame, image, function(finished) {
-      if (finished, response) {
-        console.log(this.response)
+    requestmanager.add(frame, image, function(finished, response) {
+      if (finished) {
+        let json = JSON.stringify(response)
+        fs.writeFile('translated.json', json, 'utf8',function(err, result) {
 
+        });
         res.redirect('/api/upload');
 
       }
