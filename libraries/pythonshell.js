@@ -35,42 +35,33 @@ module.exports = class Python {
         });
         pyshell.end(function (err, code, signal) {
             if (err) throw err;
+
             console.log('The exit code was: ' + code);
             console.log('The exit signal was: ' + signal);
             console.log('finished');
-            callback(true)
+            if (code == 0) {
+                return callback(true)
+
+            }
         });
           
     }
 
     overlay(callback) {
-        var args = [this.file]
-        if (this.language) {
-            args.push(this.language)
-        }
+        var args = ["translated.json", this.file]
+        
         let options = {
             args: args,
             mode: "text"
         }
-        let pyshell = new PythonShell('run.py', options);
-        pyshell.on('message', function (message) {
-            if (message) {
-                try {
-                    let out = JSON.parse(message)
-                    callback(null, out.frame, out.image)
-                } catch(err) {
-                    
-                }
-                
-            }
-            
-        });
+        let pyshell = new PythonShell('overlay.py', options);
+        
         pyshell.end(function (err, code, signal) {
             if (err) throw err;
             console.log('The exit code was: ' + code);
             console.log('The exit signal was: ' + signal);
             console.log('finished');
-            callback(true)
+            callback(null)
         });
           
     }

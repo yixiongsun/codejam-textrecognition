@@ -13,6 +13,9 @@ block content
       p All files will be uploaded to "/uploads" directory.
       form(role='form', enctype='multipart/form-data', method='POST')
         .form-group
+          label.col-form-label.font-weight-bold Language
+          .col-md-6
+            input(type="text", name="language")
           label.col-form-label.font-weight-bold File Input
           .col-md-6
             input(type='file', name='myFile')

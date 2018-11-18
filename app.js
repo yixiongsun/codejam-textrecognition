@@ -35,9 +35,9 @@ const storage = multer.diskStorage({
 
 
 const upload = multer({storage: storage})
-const realtime = multer({ dest: path.join(__dirname, 'uploads') })
+const realtime = multer()
 
-
+//{ dest: path.join(__dirname, 'uploads') }
 /**
  * 
  * Load environment variables from .env file, where API keys and passwords are configured.
@@ -93,26 +93,13 @@ app.use((req, res, next) => {
   res.locals.user = req.user;
   next();
 });
-/*
-app.use((req, res, next) => {
-  // After successful login, redirect back to the intended page
-  if (!req.user
-    && req.path !== '/login'
-    && req.path !== '/signup'
-    && !req.path.match(/^\/auth/)
-    && !req.path.match(/\./)) {
-    req.session.returnTo = req.originalUrl;
-  } else if (req.user
-    && (req.path === '/account' || req.path.match(/^\/api/))) {
-    req.session.returnTo = req.originalUrl;
-  }
-  next();
-});*/
+
 app.use('/', express.static(path.join(__dirname, 'public'), { maxAge: 31557600000 }));
 app.use('/js/lib', express.static(path.join(__dirname, 'node_modules/popper.js/dist/umd'), { maxAge: 31557600000 }));
 app.use('/js/lib', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js'), { maxAge: 31557600000 }));
 app.use('/js/lib', express.static(path.join(__dirname, 'node_modules/jquery/dist'), { maxAge: 31557600000 }));
 app.use('/webfonts', express.static(path.join(__dirname, 'node_modules/@fortawesome/fontawesome-free/webfonts'), { maxAge: 31557600000 }));
+app.use('/resources', express.static(path.join(__dirname, 'public', 'resources'), { maxAge: 31557600000 }))
 
 /**
  * Primary app routes.
@@ -122,12 +109,12 @@ app.get('/', homeController.index);
  * API examples routes.
  */
 app.get('/api', apiController.getApi);
-app.get('/api/upload', apiController.getFileUpload);
+app.get('/upload', apiController.getFileUpload);
 app.get('/api/realtime', apiController.getRealTime);
-app.post('/api/realtime', realtime.single("blob"), apiController.postRealTime);
-app.post('/api/upload', upload.single("myFile"), apiController.postFileUpload);
-
-
+app.post('/api/realtime', upload.any(), apiController.postRealTime);
+app.post('/upload', upload.single("myFile"), apiController.postFileUpload);
+app.get('/videostream', apiController.getVideoStream);
+app.get('/video', apiController.getVideo)
 
 app.get('/auth/google', passport.authenticate('google', { scope: 'profile email' }));
 app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
@@ -152,11 +139,11 @@ if (process.env.NODE_ENV === 'development') {
 async function test() {
   let test = new googleAPI()
   let a = await test.textDetection()
-  let requestmanager = new RequestManager()
-  let result = requestmanager.textOnFrame(a)
-  console.log(result)
+  //let requestmanager = new RequestManager()
+  //let result = requestmanager.textOnFrame(a)
+  console.log(a)
 
-  test.languageDetect(result)
+  //test.languageDetect(result)
 }
 
 /**
@@ -165,7 +152,7 @@ async function test() {
 app.listen(app.get('port'), () => {
   console.log('%s App is running at http://localhost:%d in %s mode', chalk.green('✓'), app.get('port'), app.get('env'));
   console.log('  Press CTRL-C to stop\n');
-  //test()
+
   
 });
 

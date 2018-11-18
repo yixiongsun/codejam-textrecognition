@@ -34,8 +34,8 @@ input = sys.argv[1]
 cap = cv2.VideoCapture(input)
 length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
-frame_interval = 2
-length = 200
+frame_interval = 50
+#length = 1000
 for i in range(0, length, frame_interval):
     if(length-1 < i+frame_interval):
         subprocess.call(['ffmpeg', '-i', input, '-vf', 'select=\'between(n\,{}\,{})\''.format(i, length-1), '-vsync', '0', '-frame_pts', '1', 'images/frame%d.png'])

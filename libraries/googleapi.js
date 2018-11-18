@@ -18,7 +18,8 @@ const translate_client = new translate.Translate({
 
 
 module.exports = class GoogleAPI {
-    constructor() {
+    constructor(language) {
+        this.language = language
         //this.vision = google.vision({version: "v1p2beta1", })
     }
 
@@ -26,16 +27,19 @@ module.exports = class GoogleAPI {
         return new Promise(function (resolve, reject) {
 
             let request = {
-                image: { content: base64 }
+                image: { content: base64 },
+                features:[{
+                    type: "DOCUMENT_TEXT_DETECTION"
+                }]
             };
             vision_client
-                .textDetection(request)
+                .annotateImage(request)
                 .then(results => {
                     const labels = results[0].textAnnotations;
 
                     //console.log(labels);
                     //labels.forEach(label => console.log(label.description));
-                    resolve(labels)
+                    resolve(results)
                 })
                 .catch(err => {
                     console.error('ERROR:', err);
@@ -50,13 +54,21 @@ module.exports = class GoogleAPI {
             return []
         }
         try {
+            var newArray = textarray.slice()
             var text = []
-            for (var i in textarray) {
-                text.push(textarray[i].word)
+            for (var i in newArray) {
+                text.push(newArray[i].line)
             }
 
-            var lines = []
+            let translates = await this.translation(text)
+            for (var i in newArray) {
+                newArray[i].line = translates[i]
+            
+                
+            }
+            return newArray
 
+            /*
             let languages = await this.languages(text)
             var currentLanguage = languages[0]
             var currentText = text[0]
@@ -86,7 +98,7 @@ module.exports = class GoogleAPI {
 
             }
             
-            return []
+            return []*/
 
 
         } catch (err) {
@@ -99,9 +111,9 @@ module.exports = class GoogleAPI {
 
         return {
             topleft: { x: array[index1].x1, y: array[index1].y1 },
-            topright: { x: array[index2].x2, y: array[index1].y1 },
-            bottomright: { x: array[index2].x2, y: array[index2].y2 },
-            bottomleft: { x: array[index1].x1, y: array[index2].y2 }
+            topright: { x: array[index2].x2, y: array[index1].y2 },
+            bottomright: { x: array[index2].x3, y: array[index2].y3 },
+            bottomleft: { x: array[index1].x4, y: array[index2].y4 }
         }
 
 
@@ -112,7 +124,6 @@ module.exports = class GoogleAPI {
             translate_client.detect(text).then(results => {
                 let detections = results[0];
 
-                //console.log('Detections:');
                 var languages = []
                 detections.forEach(detection => {
                     languages.push(detection.language)
@@ -126,8 +137,9 @@ module.exports = class GoogleAPI {
     }
 
     translation(text) {
+        let lang = this.language
         return new Promise(function (resolve, reject) {
-            translate_client.translate(text, "fr").then(results => {
+            translate_client.translate(text, lang).then(results => {
                 const translation = results[0];
                 resolve(translation)
             }).catch(err => {

@@ -1,20 +1,7 @@
-const { promisify } = require('util');
-const request = require('request');
-const cheerio = require('cheerio');
-const graph = require('fbgraph');
-const { LastFmNode } = require('lastfm');
-const tumblr = require('tumblr.js');
-const GitHub = require('@octokit/rest');
-const Twit = require('twit');
-const stripe = require('stripe')(process.env.STRIPE_SKEY);
-const Linkedin = require('node-linkedin')(process.env.LINKEDIN_ID, process.env.LINKEDIN_SECRET, process.env.LINKEDIN_CALLBACK_URL);
-const paypal = require('paypal-rest-sdk');
-const lob = require('lob')(process.env.LOB_KEY);
-const ig = require('instagram-node').instagram();
 const Python = require('../libraries/pythonshell')
 const RequestManager = require('../libraries/requestmanager')
 const fs = require('fs');
-
+const path = require('path')
 
 
 /**
@@ -43,7 +30,9 @@ exports.getFileUpload = (req, res) => {
 
 exports.postFileUpload = (req, res) => {
   let python = new Python(req.file.path, "upload")
-  let requestmanager = new RequestManager()
+  let p2 = python
+  let lang = req.body.language || "en"
+  let requestmanager = new RequestManager(lang)
   python.extract(function(finished, frame, image) {
     if (finished) {
       requestmanager.finish()
@@ -53,9 +42,12 @@ exports.postFileUpload = (req, res) => {
       if (finished) {
         let json = JSON.stringify(response)
         fs.writeFile('translated.json', json, 'utf8',function(err, result) {
-
+          p2.overlay(function(err) {
+            if (!err) {
+              res.render('api/video')
+            }
+          })
         });
-        res.redirect('/api/upload');
 
       }
     })
@@ -68,5 +60,52 @@ exports.getRealTime = (req, res) => {
 }
 
 exports.postRealTime = (req, res) => {
-  console.log(req)
+
+  // This line opens the file as a readable stream
+  res.sendFile(path.resolve(__dirname + "/../" + req.files[0].path));
+  
+}
+
+exports.getVideoStream = (req, res) => {
+  const p = path.resolve(__dirname + "/../" + "output.mp4")
+  const stat = fs.statSync(p)
+  const fileSize = stat.size
+  const range = req.headers.range
+  if (range) {
+    const parts = range.replace(/bytes=/, "").split("-")
+    const start = parseInt(parts[0], 10)
+    const end = parts[1] 
+      ? parseInt(parts[1], 10)
+      : fileSize-1
+
+    if (start > end) {
+      start = end
+    }
+
+    const chunksize = (end-start)+1
+    const file = fs.createReadStream(p, {start, end})
+    const head = {
+      'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+      'Accept-Ranges': 'bytes',
+      'Content-Length': chunksize,
+      'Content-Type': 'video/mp4',
+    }
+    res.writeHead(206, head);
+    file.pipe(res);
+  } else {
+    const head = {
+      'Content-Length': fileSize,
+      'Content-Type': 'video/mp4',
+    }
+    res.writeHead(200, head)
+    fs.createReadStream(p).pipe(res)
+  }
+
+  
+
+}
+exports.getVideo = (req, res) => {
+  res.render('api/video', {
+    title: 'Video'
+  });
 }
