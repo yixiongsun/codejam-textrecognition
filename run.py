@@ -34,7 +34,7 @@ input = sys.argv[1]
 cap = cv2.VideoCapture(input)
 length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
-frame_interval = 50
+frame_interval = 100
 #length = 1000
 for i in range(0, length, frame_interval):
     if(length-1 < i+frame_interval):
